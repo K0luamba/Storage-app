@@ -2,6 +2,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialDesignModule } from './material-design.module';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -17,6 +19,9 @@ import { StorageComponent } from './storage/storage.component';
       CommonModule,
       BrowserModule,
       RouterModule,
+      FormsModule,
+      ReactiveFormsModule,
+      BrowserAnimationsModule,
       MaterialDesignModule,
 
       AppRoutingModule

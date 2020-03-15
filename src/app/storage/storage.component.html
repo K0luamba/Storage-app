@@ -1,6 +1,27 @@
 <div class="container">
-  Контент
-  <button class="btn-action" mat-stroked-button color="primary">
-    <i class="material-icons">input</i> Начать
+  <form class="filter-form" [formGroup]="formGr" (ngSubmit)="start()">
+    <mat-form-field>
+      <input matInput placeholder="Число товаров" formControlName="countOfProducts" oninput="this.value = this.value.replace (/\D/gi, '')">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Число торговых точек" formControlName="countOfStores" oninput="this.value = this.value.replace (/\D/gi, '')">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Число дней" formControlName="countOfDays" oninput="this.value = this.value.replace (/\D/gi, '')">
+    </mat-form-field>
+    <button class="btn-action" mat-stroked-button color="primary" type="submit">
+      <i class="material-icons">input</i> Начать
+    </button>
+  </form>
+  <div class="info">
+  </div>
+  <div class="losses">
+  </div>
+  <span class="current-day"> Текущий день: {{ currentDay }} </span>
+  <button class="btn-action next" mat-stroked-button color="primary" (click)="step()">
+    <i class="material-icons">forward</i> Следующий день
+  </button>
+  <button class="btn-action stop" mat-stroked-button color="primary" (click)="stop()">
+    <i class="material-icons">cancel</i> Остановить
   </button>
 </div>

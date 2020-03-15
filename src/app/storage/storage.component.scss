@@ -1,10 +1,32 @@
 .container {
-    padding: 20px;
+    position: relative;
+    padding: 0 20px 20px 20px;
+}
+
+.filter-form {
+    margin-left: 20%;
+    margin-bottom: 20px;
+    mat-form-field {
+        display: inline-block;
+        margin-right: 20px;
+    }
 }
 
 .btn-action {
+    font-size: 16px;
     .material-icons {
         margin-right: 8px;
+        margin-bottom: 3px;
+    }
+    &.next {
+        position: absolute;
+        bottom: 30px;
+        right: 350px;
+    }
+    &.stop {
+        position: absolute;
+        bottom: 30px;
+        right: 100px;
     }
     &:hover {
         color: #068687;
@@ -15,4 +37,24 @@
             -moz-transform: scale(1.15);
         }
     }
+}
+
+.info {
+    height: 500px;
+    border: 1px solid #cccccc;
+}
+
+.losses {
+    display: inline-block;
+    width: 50%;
+    height: 245px;
+    border: 1px solid #cccccc;
+    margin-top: 15px;
+}
+
+.current-day {
+    position: absolute;
+    bottom: 120px;
+    left: calc(100% - 540px);
+    font-size: 18px;
 }
