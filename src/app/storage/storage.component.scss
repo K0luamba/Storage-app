@@ -1,0 +1,18 @@
+.container {
+    padding: 20px;
+}
+
+.btn-action {
+    .material-icons {
+        margin-right: 8px;
+    }
+    &:hover {
+        color: #068687;
+        .material-icons {
+            transform: scale(1.15);
+            -webkit-transform: scale(1.15);
+            -ms-transform: scale(1.15);
+            -moz-transform: scale(1.15);
+        }
+    }
+}
