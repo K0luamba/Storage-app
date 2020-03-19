@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
+import { Product, Box } from './types';
+import { StorageConstants } from './constants.helper';
 
 @Component({
   selector: 'app-storage',
@@ -14,6 +16,8 @@ export class StorageComponent implements OnInit {
   K = 12;
   M = 3;
   N = 30;
+  knownProducts: Array<Product>;
+  storageBoxes: Array<Box> = [];
 
   constructor(
     private $fb: FormBuilder,
@@ -36,6 +40,15 @@ export class StorageComponent implements OnInit {
   start() {
     console.log('start');
     // инициализация продуктов, торговых точек и т.д.
+    this.knownProducts = StorageConstants.productTypes.slice(0, this.K);
+    for (const productType of this.knownProducts) {
+      for (let i = 0; i < 10; i++) {
+        this.storageBoxes.push({
+          product: productType,
+          deliveryDate: 1
+        });
+      }
+    }
     this.step();
   }
 
