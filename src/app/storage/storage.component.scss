@@ -1,11 +1,22 @@
+[hidden] {
+    display: none !important;
+}
+
 .container {
     position: relative;
     padding: 0 20px 20px 20px;
 }
 
+.header {
+    height: 30px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .filter-form {
     margin-left: 20%;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     mat-form-field {
         display: inline-block;
         margin-right: 20px;
@@ -40,17 +51,71 @@
 }
 
 .info {
-    height: 500px;
+    height: 510px;
     border: 1px solid #cccccc;
+
+    & > .wrapper {
+        display: inline-block;
+        width: 25%;
+        height: 100%;
+        padding: 10px;
+        vertical-align: top;
+    }
+    & .table-wrapper {
+        height: calc(100% - 30px);
+        overflow-y: auto;
+        padding-left: 7px;
+        padding-right: 7px;
+        padding-bottom: 7px;
+    }
+}
+
+.table-wrapper::-webkit-scrollbar-track {border-radius: 6px;}
+.table-wrapper::-webkit-scrollbar {width: 12px;}
+.table-wrapper::-webkit-scrollbar-thumb {border-radius: 6px; background-color: #cacaca;}
+.table-wrapper::-webkit-scrollbar-thumb {background: #068687;}
+
+table {
+    width: 100%;
+}
+
+th {
+    border-top: 1px solid #dddddd;
+    font-size: 14px;
+    text-align: center !important;
+}
+
+td {
+    text-align: center;
+}
+
+tr.mat-row {
+    height: 36px !important;
 }
 
 .losses {
     display: inline-block;
     width: 50%;
     height: 245px;
-    border: 1px solid #cccccc;
     margin-top: 15px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    box-shadow: 0 7px 14px rgba(0,0,0,0.20), 0 7px 7px rgba(0,0,0,0.18);
+
+    & > .header {
+        padding-top: 8px;
+    }
+    & > .losses-notes {
+        height: calc(100% - 40px);
+        overflow-y: auto;
+        padding: 0 10px 0 20px;
+    }
 }
+
+.losses-notes::-webkit-scrollbar-track {border-radius: 6px;}
+.losses-notes::-webkit-scrollbar {width: 12px;}
+.losses-notes::-webkit-scrollbar-thumb {border-radius: 6px; background-color: #cacaca;}
+.losses-notes::-webkit-scrollbar-thumb {background: #068687;}
 
 .current-day {
     position: absolute;

@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialDesignModule } from './material-design.module';
+import { MatSortModule } from '@angular/material/sort';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -23,6 +24,7 @@ import { StorageComponent } from './storage/storage.component';
       ReactiveFormsModule,
       BrowserAnimationsModule,
       MaterialDesignModule,
+      MatSortModule,
 
       AppRoutingModule
    ],

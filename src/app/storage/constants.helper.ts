@@ -124,4 +124,9 @@ export class StorageConstants {
             price: 1250
         },
     ];
+
+    static readonly boxesDisplayedColumns = [
+        'name',
+        'deliveryDate'
+    ];
 }

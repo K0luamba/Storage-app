@@ -1,21 +1,57 @@
 <div class="container">
   <form class="filter-form" [formGroup]="formGr" (ngSubmit)="start()">
     <mat-form-field>
-      <input matInput placeholder="Число товаров" formControlName="countOfProducts" oninput="this.value = this.value.replace (/\D/gi, '')">
+      <input matInput placeholder="Число товаров" formControlName="countOfProducts"
+        oninput="this.value = this.value.replace (/\D/gi, '')">
     </mat-form-field>
     <mat-form-field>
-      <input matInput placeholder="Число торговых точек" formControlName="countOfStores" oninput="this.value = this.value.replace (/\D/gi, '')">
+      <input matInput placeholder="Число торговых точек" formControlName="countOfStores"
+        oninput="this.value = this.value.replace (/\D/gi, '')">
     </mat-form-field>
     <mat-form-field>
-      <input matInput placeholder="Число дней" formControlName="countOfDays" oninput="this.value = this.value.replace (/\D/gi, '')">
+      <input matInput placeholder="Число дней" formControlName="countOfDays"
+        oninput="this.value = this.value.replace (/\D/gi, '')">
     </mat-form-field>
     <button class="btn-action" mat-stroked-button color="primary" type="submit">
       <i class="material-icons">input</i> Начать
     </button>
   </form>
   <div class="info">
+    <div class="wrapper">
+      <div class="header" [hidden]="!boxesDataSource.data || boxesDataSource.data.length === 0"> Товары </div>
+      <div class="table-wrapper">
+        <table mat-table [hidden]="!boxesDataSource.data || boxesDataSource.data.length === 0"
+          [dataSource]="boxesDataSource" class="mat-elevation-z8">
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Имя продукта </th>
+            <td mat-cell *matCellDef="let element"> {{ element.product.name }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="deliveryDate">
+            <th mat-header-cell *matHeaderCellDef> Дата поставки </th>
+            <td mat-cell *matCellDef="let element"> {{ element.deliveryDate }} </td>
+          </ng-container>
+
+          <!-- boxesDisplayedColumns определяет порядок вывода столбцов -->
+          <tr mat-header-row *matHeaderRowDef="StorageConstants.boxesDisplayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: StorageConstants.boxesDisplayedColumns;"></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="wrapper">
+    </div>
+    <div class="wrapper">
+    </div>
+    <div class="wrapper">
+    </div>
   </div>
   <div class="losses">
+    <div class="header"> Потери за сегодня </div>
+    <div class="losses-notes">
+      <p *ngFor="let str of todayLosses"> {{ str }} </p>
+    </div>
   </div>
   <span class="current-day"> Текущий день: {{ currentDay }} </span>
   <button class="btn-action next" mat-stroked-button color="primary" (click)="step()">
