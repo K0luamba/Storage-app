@@ -41,6 +41,30 @@
     </div>
 
     <div class="wrapper">
+      <div class="header" [hidden]="!ordersDataSource.data"> Заказы </div>
+      <div class="table-wrapper">
+        <table mat-table [hidden]="!ordersDataSource.data || ordersDataSource.data.length === 0"
+          [dataSource]="ordersDataSource" class="mat-elevation-z8">
+
+          <ng-container matColumnDef="storeName">
+            <th mat-header-cell *matHeaderCellDef> Торговая точка </th>
+            <td mat-cell *matCellDef="let element"> {{ TableHelper.getStoreName(element, stores) }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="productName">
+            <th mat-header-cell *matHeaderCellDef> Имя продукта </th>
+            <td mat-cell *matCellDef="let element"> {{ element.product.name }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="numberOfPacks">
+            <th mat-header-cell *matHeaderCellDef> Число пачек </th>
+            <td mat-cell *matCellDef="let element"> {{ element.numberOfPacks }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="StorageConstants.ordersDisplayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: StorageConstants.ordersDisplayedColumns;"></tr>
+        </table>
+      </div>
     </div>
     <div class="wrapper">
     </div>
