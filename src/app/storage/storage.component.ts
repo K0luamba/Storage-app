@@ -17,20 +17,24 @@ export class StorageComponent implements OnInit {
   TableHelper = TableHelper;
   formGr: FormGroup;
 
-  currentDay = 0;
   K = 12;
   M = 3;
   N = 30;
-  knownProducts: Array<Product>;
-  storageBoxes: Array<Box> = [];
-  ordersDataSource = new MatTableDataSource<OrderItem>();
-  boxesDataSource = new MatTableDataSource<Box>();
-  stores: Array<Store>;
   MIN_ORDER_POINTS = 0;
   MAX_ORDER_POINTS = 3;
   MIN_BOXES_TO_ORDER = 1;
   MAX_BOXES_TO_ORDER = 5;
+
+  currentDay = 0;
+  knownProducts: Array<Product>;
+  storageBoxes: Array<Box> = [];
+  boxesDataSource = new MatTableDataSource<Box>();
+  ordersDataSource = new MatTableDataSource<OrderItem>();
+  deliveriesDataSource = new MatTableDataSource<OrderItem>();
+  stores: Array<Store>;
+  deliveries: Array<OrderItem>;
   totalLosses = 0;
+  totalIncome = 0;
   todayLosses: Array<string> = [];
 
   constructor(
@@ -41,6 +45,7 @@ export class StorageComponent implements OnInit {
 
   ngOnInit() {
     this.ordersDataSource.data = null;
+    this.deliveriesDataSource.data = null;
   }
 
   // случайное целое число от min до max
@@ -49,7 +54,7 @@ export class StorageComponent implements OnInit {
     return Math.floor(rand);
   }
 
-  private createFormGroup(): FormGroup {
+  createFormGroup(): FormGroup {
     return this.$fb.group({
       countOfProducts: ['', []],
       countOfStores: ['', []],
@@ -71,9 +76,10 @@ export class StorageComponent implements OnInit {
       }
     }
     this.boxesDataSource.data = this.storageBoxes;
+    // this.boxesDataSource.data = this.boxesDataSource.data.slice(5); - это изменения, не несущие изменения в таблице, но их можно делать для учета
+    // this.storageBoxes = this.boxesDataSource.data; !!! - а вот это применение тех изменений в таблицу
 
     this.stores = StorageConstants.stores.slice(0, this.M);
-    console.log(this.stores);
 
     this.step();
   }
@@ -85,9 +91,20 @@ export class StorageComponent implements OnInit {
     }
     console.log('день:', this.currentDay);
     // тут идут все действия этого дня
-    // перевозки
+    // перевозки - this.boxesDataSource.data = copyObjectArr(this.storageBoxes);
     this.writeOffGoods();
     this.generateOrders();
+    this.deliveries = [];
+    for (const store of this.stores) {
+      if (store.orders.length !== 0 && store.orders[0].items.length !== 0) {
+        for (const item of store.orders[0].items) {
+          this.acceptOrderItem(item);
+        }
+      }
+    }
+    this.deliveriesDataSource.data = this.deliveries;
+    console.log('запланировали перевозки:', this.deliveries);
+    console.log('доход:', this.totalIncome);
   }
 
   stop() {
@@ -116,7 +133,7 @@ export class StorageComponent implements OnInit {
     for (const store of this.stores) {
       store.orders = []; // предыдущие заказы забываем, так как они либо исполнены, либо отклонены
       const numberOfItems = this.randomInteger(this.MIN_ORDER_POINTS, this.MAX_ORDER_POINTS);
-      console.log('добавим продуктов:', numberOfItems);
+      console.log(`от ${store.name} закажем продуктов:`, numberOfItems);
       if (numberOfItems > 0) {
         const newOrder: Order = {
           items: []
@@ -141,10 +158,38 @@ export class StorageComponent implements OnInit {
           });
         }
         store.orders.push(newOrder);
-        console.log('добавили заказ:', store);
+        console.log('добавили заказ в:', store);
       }
     }
     this.ordersDataSource.data = ordersData;
+    console.log(this.stores);
   }
 
+  // обработка одного пункта заказа с учетом будущего(!) вычета продуктов со склада и добавлением перевозки
+  acceptOrderItem(orderItem: OrderItem) {
+    const numberOfBoxes = this.getOptimalNumberofBoxes(orderItem.product, orderItem.numberOfPacks);
+    if (numberOfBoxes > 0) {
+      // тут должно идти вычитание нужного числа опт. упаковок (numberOfBoxes) из this.boxesDataSource.data и добавление доходов
+      this.totalIncome += numberOfBoxes * orderItem.product.price;
+      this.deliveries.push({
+        product: orderItem.product,
+        numberOfPacks: numberOfBoxes * orderItem.product.boxCapacity
+      });
+    }
+  }
+
+  // смотрит, сколько можем отправить опт. упаковок товара product, чтобы отправить пачек в кол-ве needPacks
+  getOptimalNumberofBoxes(product: Product, needPacks: number): number {
+    const countOfBoxes = this.boxesDataSource.data.filter(box => box.product.name === product.name).length;
+    // вариант 1: свободного товара на складе не осталось
+    if (countOfBoxes === 0) {
+      return 0;
+    }
+    // вариант 2: заказано товара больше или ровно столько, сколько возможно отправить
+    if (countOfBoxes * product.boxCapacity <= needPacks) {
+      return countOfBoxes;
+    }
+    // вариант 3: заказано меньше чем есть на складе, отправляем чуть больше товара
+    return Math.ceil(needPacks / product.boxCapacity);
+  }
 }
