@@ -70,7 +70,7 @@ export class StorageConstants {
             price: 3500
         },
         {
-            name: 'Cметана',
+            name: 'Сметана',
             storagePeriod: 10,
             boxCapacity: 25,
             price: 1375

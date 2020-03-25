@@ -5,6 +5,7 @@ import { MatSort, MatTableDataSource } from '@angular/material';
 import { Product, Box, Order, Store, OrderItem } from './types';
 import { StorageConstants } from './constants.helper';
 import { TableHelper } from './table.helper';
+import { SortHelper } from './sort.helper';
 
 @Component({
   selector: 'app-storage',
@@ -75,10 +76,8 @@ export class StorageComponent implements OnInit {
         });
       }
     }
+    this.storageBoxes.sort(SortHelper.sortByProductName);
     this.boxesDataSource.data = this.storageBoxes;
-    // this.boxesDataSource.data = this.boxesDataSource.data.slice(5); - это изменения, не несущие изменения в таблице, но их можно делать для учета
-    // this.storageBoxes = this.boxesDataSource.data; !!! - а вот это применение тех изменений в таблицу
-
     this.stores = StorageConstants.stores.slice(0, this.M);
 
     this.step();
@@ -91,10 +90,11 @@ export class StorageComponent implements OnInit {
     }
     console.log('день:', this.currentDay);
     // тут идут все действия этого дня
-    // перевозки - this.boxesDataSource.data = copyObjectArr(this.storageBoxes);
+    this.storageBoxes = this.boxesDataSource.data; // применение запланировнных ранее перевозок
     this.writeOffGoods();
     this.generateOrders();
     this.deliveries = [];
+    this.boxesDataSource.data.sort(SortHelper.sortByDeliveryDate);
     for (const store of this.stores) {
       if (store.orders.length !== 0 && store.orders[0].items.length !== 0) {
         for (const item of store.orders[0].items) {
@@ -102,6 +102,7 @@ export class StorageComponent implements OnInit {
         }
       }
     }
+    this.boxesDataSource.data.sort(SortHelper.sortByProductName);
     this.deliveriesDataSource.data = this.deliveries;
     console.log('запланировали перевозки:', this.deliveries);
     console.log('доход:', this.totalIncome);
@@ -133,7 +134,7 @@ export class StorageComponent implements OnInit {
     for (const store of this.stores) {
       store.orders = []; // предыдущие заказы забываем, так как они либо исполнены, либо отклонены
       const numberOfItems = this.randomInteger(this.MIN_ORDER_POINTS, this.MAX_ORDER_POINTS);
-      console.log(`от ${store.name} закажем продуктов:`, numberOfItems);
+      console.log(`от торг. точки ${store.name} закажем ${numberOfItems} продуктов:`);
       if (numberOfItems > 0) {
         const newOrder: Order = {
           items: []
@@ -158,18 +159,18 @@ export class StorageComponent implements OnInit {
           });
         }
         store.orders.push(newOrder);
-        console.log('добавили заказ в:', store);
+        console.log('добавили заказ в торг. точку:', store);
       }
     }
     this.ordersDataSource.data = ordersData;
     console.log(this.stores);
   }
 
-  // обработка одного пункта заказа с учетом будущего(!) вычета продуктов со склада и добавлением перевозки
+  // обработка одного пункта заказа с учетом будущего вывоза продуктов со склада и добавлением перевозки
   acceptOrderItem(orderItem: OrderItem) {
     const numberOfBoxes = this.getOptimalNumberofBoxes(orderItem.product, orderItem.numberOfPacks);
     if (numberOfBoxes > 0) {
-      // тут должно идти вычитание нужного числа опт. упаковок (numberOfBoxes) из this.boxesDataSource.data и добавление доходов
+      this.prepareGoodsToDeliver(orderItem.product, numberOfBoxes);
       this.totalIncome += numberOfBoxes * orderItem.product.price;
       this.deliveries.push({
         product: orderItem.product,
@@ -191,5 +192,19 @@ export class StorageComponent implements OnInit {
     }
     // вариант 3: заказано меньше чем есть на складе, отправляем чуть больше товара
     return Math.ceil(needPacks / product.boxCapacity);
+  }
+
+  // плинирует списание товаров со склада на завтрашнюю доставку
+  prepareGoodsToDeliver(product: Product, numberOfBoxes: number) {
+    let proceedBoxes = 0;
+    let i = 0;
+    while (proceedBoxes < numberOfBoxes) {
+      if (this.boxesDataSource.data[i].product.name === product.name) {
+        this.boxesDataSource.data.splice(i, 1);
+        proceedBoxes++;
+      } else {
+        i++;
+      }
+    }
   }
 }
