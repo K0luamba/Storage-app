@@ -179,4 +179,10 @@ export class StorageConstants {
         'productName',
         'numberOfPacks'
     ];
+
+    static readonly requestsDisplayedColumns = [
+        'productName',
+        'numberOfBoxes',
+        'deliveryDate'
+    ];
 }

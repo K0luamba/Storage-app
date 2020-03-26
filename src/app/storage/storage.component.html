@@ -88,8 +88,34 @@
         </table>
       </div>
     </div>
+
     <div class="wrapper">
+      <div class="header" [hidden]="!requestsDataSource.data"> Заявки </div>
+      <div class="table-wrapper">
+        <table mat-table [hidden]="!requestsDataSource.data || requestsDataSource.data.length === 0"
+          [dataSource]="requestsDataSource" class="mat-elevation-z8">
+
+          <ng-container matColumnDef="productName">
+            <th mat-header-cell *matHeaderCellDef> Продукт </th>
+            <td mat-cell *matCellDef="let element"> {{ element.product.name }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="numberOfBoxes">
+            <th mat-header-cell *matHeaderCellDef> Число упаковок </th>
+            <td mat-cell *matCellDef="let element" > {{ element.numberOfBoxes }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="deliveryDate">
+            <th mat-header-cell *matHeaderCellDef> Дата поставки </th>
+            <td mat-cell *matCellDef="let element" > {{ element.deliveryDate }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="StorageConstants.requestsDisplayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: StorageConstants.requestsDisplayedColumns;"></tr>
+        </table>
+      </div>
     </div>
+
   </div>
   <div class="losses">
     <div class="header"> Потери за сегодня </div>

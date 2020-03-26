@@ -18,7 +18,7 @@ export class Store {
     orders: Array<Order>;
 }
 
-// заявка на наш склад
+// заявка на наш склад на доставку списка продуктов
 export class Order {
     items: Array<OrderItem>;
 }
@@ -26,4 +26,11 @@ export class Order {
 export class OrderItem {
     product: Product;
     numberOfPacks: number; // число заказанных пачек (1 упаковка = n пачек)
+}
+
+// запрос поставщику на оптовую поставку продукта
+export class Request {
+    product: Product;
+    numberOfBoxes: number;
+    deliveryDate: number;
 }

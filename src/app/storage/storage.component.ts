@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatSort, MatTableDataSource } from '@angular/material';
 
-import { Product, Box, Order, Store, OrderItem } from './types';
+import { Product, Box, Order, Store, OrderItem, Request } from './types';
 import { StorageConstants } from './constants.helper';
 import { TableHelper } from './table.helper';
 import { SortHelper } from './sort.helper';
@@ -25,15 +25,21 @@ export class StorageComponent implements OnInit {
   MAX_ORDER_POINTS = 3;
   MIN_BOXES_TO_ORDER = 1;
   MAX_BOXES_TO_ORDER = 5;
+  MIN_OPTIMAL_PRODUCT_BOXES = 5;
+  BOXES_IN_REQUEST = 10;
+  MIN_DAYS_TO_DELIVER = 1;
+  MAX_DAYS_TO_DELIVER = 5;
 
   currentDay = 0;
   knownProducts: Array<Product>;
   storageBoxes: Array<Box> = [];
   boxesDataSource = new MatTableDataSource<Box>();
-  ordersDataSource = new MatTableDataSource<OrderItem>();
-  deliveriesDataSource = new MatTableDataSource<OrderItem>();
   stores: Array<Store>;
+  ordersDataSource = new MatTableDataSource<OrderItem>();
   deliveries: Array<OrderItem>;
+  deliveriesDataSource = new MatTableDataSource<OrderItem>();
+  requests: Array<Request> = [];
+  requestsDataSource = new MatTableDataSource<Request>();
   totalLosses = 0;
   totalIncome = 0;
   todayLosses: Array<string> = [];
@@ -47,10 +53,11 @@ export class StorageComponent implements OnInit {
   ngOnInit() {
     this.ordersDataSource.data = null;
     this.deliveriesDataSource.data = null;
+    this.requestsDataSource.data = null;
   }
 
   // случайное целое число от min до max
-  randomInteger(min, max): number {
+  randomInteger(min: number, max: number): number {
     const rand = min + Math.random() * (max + 1 - min);
     return Math.floor(rand);
   }
@@ -105,7 +112,8 @@ export class StorageComponent implements OnInit {
     this.boxesDataSource.data.sort(SortHelper.sortByProductName);
     this.deliveriesDataSource.data = this.deliveries;
     console.log('запланировали перевозки:', this.deliveries);
-    console.log('доход:', this.totalIncome);
+    this.makeRequests();
+    console.log('текущие заявки:', this.requests, this.requestsDataSource.data);
   }
 
   stop() {
@@ -124,7 +132,6 @@ export class StorageComponent implements OnInit {
     }
     this.storageBoxes = this.storageBoxes.filter(item => item.deliveryDate + item.product.storagePeriod > this.currentDay);
     this.boxesDataSource.data = this.storageBoxes; // обновление данных в таблице
-    // console.log('суммарные потери:', this.totalLosses);
   }
 
   // проход по торговым точкам и генерация заказов
@@ -147,6 +154,7 @@ export class StorageComponent implements OnInit {
               productIndex = this.randomInteger(0, this.K - 1);
             }
           }
+          orderedProducts.push(productIndex);
           const packsToOrder = this.randomInteger(this.MIN_BOXES_TO_ORDER * this.knownProducts[productIndex].boxCapacity,
             this.MAX_BOXES_TO_ORDER * this.knownProducts[productIndex].boxCapacity);
           newOrder.items.push({
@@ -194,17 +202,40 @@ export class StorageComponent implements OnInit {
     return Math.ceil(needPacks / product.boxCapacity);
   }
 
-  // плинирует списание товаров со склада на завтрашнюю доставку
+  // плинирует списание товаров со склада на доставку
   prepareGoodsToDeliver(product: Product, numberOfBoxes: number) {
     let proceedBoxes = 0;
     let i = 0;
     while (proceedBoxes < numberOfBoxes) {
-      if (this.boxesDataSource.data[i].product.name === product.name) {
-        this.boxesDataSource.data.splice(i, 1);
+      if (this.storageBoxes[i].product.name === product.name) {
+        this.storageBoxes.splice(i, 1);
         proceedBoxes++;
       } else {
         i++;
       }
     }
+  }
+
+  // проверяет, нужно ли (уже с учетом запланированных перевозок) докупать продукты и при надобности делает заявки поставщику
+  makeRequests() {
+    this.requestsDataSource.data = [];
+    const todayRequests: Array<Request> = [];
+    for (const knownProduct of this.knownProducts) {
+      if (this.getCountOfProduct(knownProduct) < this.MIN_OPTIMAL_PRODUCT_BOXES) {
+        const newRequest = {
+          product: knownProduct,
+          numberOfBoxes: this.BOXES_IN_REQUEST,
+          deliveryDate: this.currentDay + this.randomInteger(this.MIN_DAYS_TO_DELIVER, this.MAX_DAYS_TO_DELIVER)
+        };
+        this.requests.push(newRequest);
+        todayRequests.push(newRequest);
+      }
+    }
+    this.requestsDataSource.data = todayRequests;
+  }
+
+  // считает, сколько сейчас на складе есть оптовых упаковок товара product
+  getCountOfProduct(product: Product): number {
+    return this.storageBoxes.filter(item => item.product.name === product.name).length;
   }
 }
