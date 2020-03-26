@@ -97,11 +97,15 @@ export class StorageComponent implements OnInit {
     }
     console.log('день:', this.currentDay);
     // тут идут все действия этого дня
-    this.storageBoxes = this.boxesDataSource.data; // применение запланировнных ранее перевозок
+    for (const request of this.requests) {
+      if (request.deliveryDate === this.currentDay) {
+        this.proceedRequest(request);
+      }
+    }
     this.writeOffGoods();
     this.generateOrders();
     this.deliveries = [];
-    this.boxesDataSource.data.sort(SortHelper.sortByDeliveryDate);
+    this.boxesDataSource.data.sort(SortHelper.sortByDeliveryDate); // storageBoxes???
     for (const store of this.stores) {
       if (store.orders.length !== 0 && store.orders[0].items.length !== 0) {
         for (const item of store.orders[0].items) {
@@ -111,9 +115,9 @@ export class StorageComponent implements OnInit {
     }
     this.boxesDataSource.data.sort(SortHelper.sortByProductName);
     this.deliveriesDataSource.data = this.deliveries;
-    console.log('запланировали перевозки:', this.deliveries);
+    // console.log('запланировали перевозки:', this.deliveries);
     this.makeRequests();
-    console.log('текущие заявки:', this.requests, this.requestsDataSource.data);
+    // console.log('текущие заявки:', this.requests);
   }
 
   stop() {
@@ -131,6 +135,7 @@ export class StorageComponent implements OnInit {
       }
     }
     this.storageBoxes = this.storageBoxes.filter(item => item.deliveryDate + item.product.storagePeriod > this.currentDay);
+    this.storageBoxes.sort(SortHelper.sortByProductName); // нужно для удобства визуальной составляющей
     this.boxesDataSource.data = this.storageBoxes; // обновление данных в таблице
   }
 
@@ -171,7 +176,6 @@ export class StorageComponent implements OnInit {
       }
     }
     this.ordersDataSource.data = ordersData;
-    console.log(this.stores);
   }
 
   // обработка одного пункта заказа с учетом будущего вывоза продуктов со склада и добавлением перевозки
@@ -237,5 +241,16 @@ export class StorageComponent implements OnInit {
   // считает, сколько сейчас на складе есть оптовых упаковок товара product
   getCountOfProduct(product: Product): number {
     return this.storageBoxes.filter(item => item.product.name === product.name).length;
+  }
+
+  // добавляет на склад продукты по исполняемой заявке request
+  proceedRequest(request: Request) {
+    for (let i = 0; i < request.numberOfBoxes; i++) {
+      this.boxesDataSource.data.push({
+        product: request.product,
+        deliveryDate: this.currentDay
+      });
+    }
+    console.log('Исполнили заявку', request);
   }
 }
