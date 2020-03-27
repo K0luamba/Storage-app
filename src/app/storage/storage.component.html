@@ -12,7 +12,7 @@
       <input matInput placeholder="Число дней" formControlName="countOfDays"
         oninput="this.value = this.value.replace (/\D/gi, '')">
     </mat-form-field>
-    <button class="btn-action" mat-stroked-button color="primary" type="submit">
+    <button class="btn-action" mat-stroked-button color="primary" type="submit" [disabled]="currentDay !== 0">
       <i class="material-icons">input</i> Начать
     </button>
   </form>
@@ -126,10 +126,10 @@
   <span class="total-income"> Суммарный доход: {{ totalIncome }}₽ </span>
   <span class="total-losses"> Суммарные убытки: {{ totalLosses }}₽ </span>
   <span class="current-day"> Текущий день: {{ currentDay }} </span>
-  <button class="btn-action next" mat-stroked-button color="primary" (click)="step()">
+  <button class="btn-action next" mat-stroked-button color="primary" (click)="step()" [disabled]="currentDay === 0">
     <i class="material-icons">forward</i> Следующий день
   </button>
-  <button class="btn-action stop" mat-stroked-button color="primary" (click)="stop()">
+  <button class="btn-action stop" mat-stroked-button color="primary" (click)="stop()" [disabled]="currentDay === 0">
     <i class="material-icons">cancel</i> Остановить
   </button>
 </div>

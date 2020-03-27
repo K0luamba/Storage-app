@@ -39,6 +39,9 @@
         bottom: 30px;
         right: 100px;
     }
+    &:disabled:hover {
+        color: #888888 !important;
+    }
     &:hover {
         color: #068687;
         .material-icons {
@@ -53,6 +56,8 @@
 .info {
     height: 510px;
     border: 1px solid #cccccc;
+    border-radius: 5px;
+    box-shadow: 0 7px 14px rgba(0,0,0,0.20), 0 7px 7px rgba(0,0,0,0.18);
 
     & > .wrapper {
         display: inline-block;
