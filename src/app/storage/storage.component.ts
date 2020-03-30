@@ -6,6 +6,7 @@ import { Product, Box, Order, Store, OrderItem, Request } from './types';
 import { StorageConstants } from './constants.helper';
 import { TableHelper } from './table.helper';
 import { SortHelper } from './sort.helper';
+import products from './products.json';
 
 @Component({
   selector: 'app-storage',
@@ -75,7 +76,8 @@ export class StorageComponent implements OnInit {
   start() {
     console.log('start');
     // инициализация продуктов, торговых точек и т.д.
-    this.knownProducts = StorageConstants.productTypes.slice(0, this.K);
+    // this.knownProducts = StorageConstants.productTypes.slice(0, this.K);
+    this.knownProducts = products.slice(0, this.K);
     for (const productType of this.knownProducts) {
       for (let i = 0; i < 10; i++) {
         this.storageBoxes.push({
@@ -145,7 +147,7 @@ export class StorageComponent implements OnInit {
         }
       }
       if (numberOfExpired > 0) {
-        this.todayLosses.push(`Списан товар "${product.name}" стоимостью ${product.price} ₽ в количестве ${numberOfExpired} штук(-и).`);
+        this.todayLosses.push(`Списан товар "${product.name}" стоимостью ${product.price} ₽ в количестве ${numberOfExpired} упаковок(-ки).`);
       }
     }
     this.storageBoxes = this.storageBoxes.filter(item => item.deliveryDate + item.product.storagePeriod > this.currentDay);
