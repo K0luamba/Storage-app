@@ -136,10 +136,16 @@ export class StorageComponent implements OnInit {
   // проверка просроченных товаров, удаление их со склада c учетом материальных потерь
   writeOffGoods() {
     this.todayLosses = [];
-    for (const box of this.storageBoxes) {
-      if (box.deliveryDate + box.product.storagePeriod <= this.currentDay) {
-        this.totalLosses += box.product.price;
-        this.todayLosses.push(`Списана упаковка товара "${box.product.name}" стоимостью ${box.product.price} ₽.`);
+    for (const product of this.knownProducts) {
+      let numberOfExpired = 0;
+      for (const box of this.storageBoxes) {
+        if (box.product.name === product.name && box.deliveryDate + box.product.storagePeriod <= this.currentDay) {
+          this.totalLosses += box.product.price;
+          numberOfExpired++;
+        }
+      }
+      if (numberOfExpired > 0) {
+        this.todayLosses.push(`Списан товар "${product.name}" стоимостью ${product.price} ₽ в количестве ${numberOfExpired} штук(-и).`);
       }
     }
     this.storageBoxes = this.storageBoxes.filter(item => item.deliveryDate + item.product.storagePeriod > this.currentDay);
