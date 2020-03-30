@@ -80,7 +80,12 @@
 
           <ng-container matColumnDef="numberOfPacks">
             <th mat-header-cell *matHeaderCellDef> Число пачек </th>
-            <td mat-cell *matCellDef="let element" [title]="element.numberOfPacks / element.product.boxCapacity"> {{ element.numberOfPacks }} </td>
+            <td mat-cell *matCellDef="let element"> {{ element.numberOfPacks }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="numberOfBoxes">
+            <th mat-header-cell *matHeaderCellDef> Число упаковок </th>
+            <td mat-cell *matCellDef="let element" > {{ element.numberOfPacks / element.product.boxCapacity }} </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="StorageConstants.deliveriesDisplayedColumns; sticky: true"></tr>
@@ -126,10 +131,13 @@
   <span class="total-income"> Суммарный доход: {{ totalIncome }}₽ </span>
   <span class="total-losses"> Суммарные убытки: {{ totalLosses }}₽ </span>
   <span class="current-day"> Текущий день: {{ currentDay }} </span>
-  <button class="btn-action next" mat-stroked-button color="primary" (click)="step()" [disabled]="currentDay === 0">
+  <button class="btn-action next" mat-stroked-button color="primary" (click)="step()" [disabled]="currentDay === 0 || stopped">
     <i class="material-icons">forward</i> Следующий день
   </button>
-  <button class="btn-action stop" mat-stroked-button color="primary" (click)="stop()" [disabled]="currentDay === 0">
+  <button class="btn-action all" mat-stroked-button color="primary" (click)="allSteps()" [disabled]="currentDay === 0 || stopped">
+    <i class="material-icons">fast_forward</i> Симулировать все
+  </button>
+  <button class="btn-action stop" mat-stroked-button color="primary" (click)="stop()" [disabled]="currentDay === 0 || stopped">
     <i class="material-icons">cancel</i> Остановить
   </button>
 </div>

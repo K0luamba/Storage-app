@@ -32,12 +32,17 @@
     &.next {
         position: absolute;
         bottom: 30px;
-        right: 350px;
+        right: 480px;
+    }
+    &.all {
+        position: absolute;
+        bottom: 30px;
+        right: 255px;
     }
     &.stop {
         position: absolute;
         bottom: 30px;
-        right: 100px;
+        right: 80px;
     }
     &:disabled:hover {
         color: #888888 !important;
@@ -49,6 +54,18 @@
             -webkit-transform: scale(1.15);
             -ms-transform: scale(1.15);
             -moz-transform: scale(1.15);
+        }
+    }
+    @media screen and (max-width: 1400px) {
+        &.next {
+            right: 340px;
+        }
+        &.all {
+            bottom: 75px;
+            right: 210px;
+        }
+        &.stop {
+            right: 120px;
         }
     }
 }

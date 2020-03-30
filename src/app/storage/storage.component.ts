@@ -31,6 +31,7 @@ export class StorageComponent implements OnInit {
   MAX_DAYS_TO_DELIVER = 5;
 
   currentDay = 0;
+  stopped = false;
   knownProducts: Array<Product>;
   storageBoxes: Array<Box> = [];
   boxesDataSource = new MatTableDataSource<Box>();
@@ -120,8 +121,15 @@ export class StorageComponent implements OnInit {
     // console.log('текущие заявки:', this.requests);
   }
 
+  allSteps() {
+    while (!this.stopped) {
+      this.step();
+    }
+  }
+
   stop() {
     console.log('stop');
+    this.stopped = true;
     // тут должны быть нужные остановки и вывод статистики
   }
 
