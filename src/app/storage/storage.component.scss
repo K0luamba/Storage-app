@@ -139,23 +139,43 @@ tr.mat-row {
 .losses-notes::-webkit-scrollbar-thumb {border-radius: 6px; background-color: #cacaca;}
 .losses-notes::-webkit-scrollbar-thumb {background: #068687;}
 
-.current-day {
+.current-day, .total-losses, .total-income, .orders-completed, .orders-partly-completed, .orders-not-completed, .stopped {
     position: absolute;
-    bottom: 120px;
-    left: calc(100% - 540px);
-    font-size: 18px;
+    font-size: 16px;
+}
+
+.current-day {
+    bottom: 140px;
+    left: calc(100% - 550px);
 }
 
 .total-losses {
-    position: absolute;
     bottom: 180px;
-    left: calc(100% - 540px);
-    font-size: 18px;
+    left: calc(100% - 550px);
 }
 
 .total-income {
-    position: absolute;
     bottom: 220px;
-    left: calc(100% - 540px);
+    left: calc(100% - 550px);
+}
+
+.orders-completed {
+    bottom: 220px;
+    left: calc(100% - 320px);
+}
+
+.orders-partly-completed {
+    bottom: 180px;
+    left: calc(100% - 320px);
+}
+
+.orders-not-completed {
+    bottom: 140px;
+    left: calc(100% - 320px);
+}
+
+.stopped {
+    bottom: 45px;
+    right: 260px;
     font-size: 18px;
 }

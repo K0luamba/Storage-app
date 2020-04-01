@@ -45,6 +45,9 @@ export class StorageComponent implements OnInit {
   totalLosses = 0;
   totalIncome = 0;
   todayLosses: Array<string> = [];
+  ordersCompleted = 0;
+  ordersPartlyCompleted = 0;
+  ordersNotCompleted = 0;
 
   constructor(
     private $fb: FormBuilder,
@@ -121,6 +124,9 @@ export class StorageComponent implements OnInit {
     // console.log('запланировали перевозки:', this.deliveries);
     this.makeRequests();
     // console.log('текущие заявки:', this.requests);
+    console.log('ordersNotCompleted:', this.ordersNotCompleted);
+    console.log('ordersPartlyCompleted:', this.ordersPartlyCompleted);
+    console.log('ordersCompleted:', this.ordersCompleted);
   }
 
   allSteps() {
@@ -212,13 +218,19 @@ export class StorageComponent implements OnInit {
     const countOfBoxes = this.boxesDataSource.data.filter(box => box.product.name === product.name).length;
     // вариант 1: свободного товара на складе не осталось
     if (countOfBoxes === 0) {
+      this.ordersNotCompleted++;
+      console.log('не выполнен');
       return 0;
     }
     // вариант 2: заказано товара больше или ровно столько, сколько возможно отправить
     if (countOfBoxes * product.boxCapacity <= needPacks) {
+      this.ordersPartlyCompleted++;
+      console.log('частично выполнен');
       return countOfBoxes;
     }
     // вариант 3: заказано меньше чем есть на складе, отправляем чуть больше товара
+    console.log('полностью выполнен');
+    this.ordersCompleted++;
     return Math.ceil(needPacks / product.boxCapacity);
   }
 

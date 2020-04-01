@@ -122,22 +122,34 @@
     </div>
 
   </div>
+
   <div class="losses">
     <div class="header"> Потери за сегодня </div>
     <div class="losses-notes">
       <p *ngFor="let str of todayLosses"> {{ str }} </p>
     </div>
   </div>
+
+  <span class="orders-completed" *ngIf="ordersCompleted + ordersPartlyCompleted + ordersNotCompleted > 0"> 
+    Заказов полностью выполнено: {{ (ordersCompleted * 100 / (ordersCompleted + ordersPartlyCompleted + ordersNotCompleted)).toFixed(1) }}% 
+  </span>
+  <span class="orders-partly-completed" *ngIf="ordersCompleted + ordersPartlyCompleted + ordersNotCompleted > 0"> 
+    Заказов частично выполнено: {{ (ordersPartlyCompleted * 100 / (ordersCompleted + ordersPartlyCompleted + ordersNotCompleted)).toFixed(1) }}% 
+  </span>
+  <span class="orders-not-completed" *ngIf="ordersCompleted + ordersPartlyCompleted + ordersNotCompleted > 0"> 
+    Заказов не выполнено: {{ (ordersNotCompleted * 100 / (ordersCompleted + ordersPartlyCompleted + ordersNotCompleted)).toFixed(1) }}% 
+  </span>
   <span class="total-income"> Суммарный доход: {{ totalIncome }}₽ </span>
   <span class="total-losses"> Суммарные убытки: {{ totalLosses }}₽ </span>
   <span class="current-day"> Текущий день: {{ currentDay }} </span>
-  <button class="btn-action next" mat-stroked-button color="primary" (click)="step()" [disabled]="currentDay === 0 || stopped">
+  <button *ngIf="!stopped" class="btn-action next" mat-stroked-button color="primary" (click)="step()" [disabled]="currentDay === 0 || stopped">
     <i class="material-icons">forward</i> Следующий день
   </button>
-  <button class="btn-action all" mat-stroked-button color="primary" (click)="allSteps()" [disabled]="currentDay === 0 || stopped">
+  <button *ngIf="!stopped" class="btn-action all" mat-stroked-button color="primary" (click)="allSteps()" [disabled]="currentDay === 0 || stopped">
     <i class="material-icons">fast_forward</i> Симулировать все
   </button>
-  <button class="btn-action stop" mat-stroked-button color="primary" (click)="stop()" [disabled]="currentDay === 0 || stopped">
+  <button *ngIf="!stopped" class="btn-action stop" mat-stroked-button color="primary" (click)="stop()" [disabled]="currentDay === 0 || stopped">
     <i class="material-icons">cancel</i> Остановить
   </button>
+  <span class="stopped" *ngIf="stopped"> Симуляция окончена </span>
 </div>
