@@ -1,5 +1,4 @@
-// TODO: попытаться делать это через json
-import { Product, Store } from './types';
+import { Store } from './types';
 
 export class StorageConstants {
     static readonly stores: Array<Store> = [

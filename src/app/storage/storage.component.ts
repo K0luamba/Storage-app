@@ -22,6 +22,8 @@ export class StorageComponent implements OnInit {
   K = 12;
   M = 3;
   N = 30;
+  MIN_PRODUCT_BOXES = 10;
+  MAX_PRODUCT_BOXES = 20;
   MIN_ORDER_POINTS = 0;
   MAX_ORDER_POINTS = 3;
   MIN_BOXES_TO_ORDER = 1;
@@ -82,7 +84,7 @@ export class StorageComponent implements OnInit {
     // this.knownProducts = StorageConstants.productTypes.slice(0, this.K);
     this.knownProducts = products.slice(0, this.K);
     for (const productType of this.knownProducts) {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < this.randomInteger(this.MIN_PRODUCT_BOXES, this.MAX_PRODUCT_BOXES); i++) {
         this.storageBoxes.push({
           product: productType,
           deliveryDate: 1
@@ -96,13 +98,13 @@ export class StorageComponent implements OnInit {
     this.step();
   }
 
+  // проводит действия, которые поочередно должны происходить за день
   step() {
     this.currentDay += 1;
     if (this.currentDay - 1 === this.N) { // отнимаем 1, чтобы закончить, условно, в 31-ый день, если N = 30
       this.stop();
     }
     console.log('день:', this.currentDay);
-    // тут идут все действия этого дня
     for (const request of this.requests) {
       if (request.deliveryDate === this.currentDay) {
         this.proceedRequest(request);
@@ -124,9 +126,6 @@ export class StorageComponent implements OnInit {
     // console.log('запланировали перевозки:', this.deliveries);
     this.makeRequests();
     // console.log('текущие заявки:', this.requests);
-    console.log('ordersNotCompleted:', this.ordersNotCompleted);
-    console.log('ordersPartlyCompleted:', this.ordersPartlyCompleted);
-    console.log('ordersCompleted:', this.ordersCompleted);
   }
 
   allSteps() {
@@ -138,7 +137,6 @@ export class StorageComponent implements OnInit {
   stop() {
     console.log('stop');
     this.stopped = true;
-    // тут должны быть нужные остановки и вывод статистики
   }
 
   // проверка просроченных товаров, удаление их со склада c учетом материальных потерь
@@ -194,7 +192,7 @@ export class StorageComponent implements OnInit {
           });
         }
         store.orders.push(newOrder);
-        console.log('добавили заказ в торг. точку:', store);
+        console.log('добавили заказ в данную торг. точку:', store);
       }
     }
     this.ordersDataSource.data = ordersData;
@@ -219,17 +217,14 @@ export class StorageComponent implements OnInit {
     // вариант 1: свободного товара на складе не осталось
     if (countOfBoxes === 0) {
       this.ordersNotCompleted++;
-      console.log('не выполнен');
       return 0;
     }
     // вариант 2: заказано товара больше или ровно столько, сколько возможно отправить
     if (countOfBoxes * product.boxCapacity <= needPacks) {
       this.ordersPartlyCompleted++;
-      console.log('частично выполнен');
       return countOfBoxes;
     }
     // вариант 3: заказано меньше чем есть на складе, отправляем чуть больше товара
-    console.log('полностью выполнен');
     this.ordersCompleted++;
     return Math.ceil(needPacks / product.boxCapacity);
   }
@@ -253,7 +248,7 @@ export class StorageComponent implements OnInit {
     this.requestsDataSource.data = [];
     const todayRequests: Array<Request> = [];
     for (const knownProduct of this.knownProducts) {
-      if (this.getCountOfProduct(knownProduct) < this.MIN_OPTIMAL_PRODUCT_BOXES) {
+      if (this.getCountOfProduct(knownProduct) < this.MIN_OPTIMAL_PRODUCT_BOXES && !this.haveProductInFutureRequests(knownProduct)) {
         const newRequest = {
           product: knownProduct,
           numberOfBoxes: this.BOXES_IN_REQUEST,
@@ -264,6 +259,17 @@ export class StorageComponent implements OnInit {
       }
     }
     this.requestsDataSource.data = todayRequests;
+  }
+
+  // определяет, что указанный продукт product уже был заказан и будет привезен в будущем
+  haveProductInFutureRequests(product: Product): boolean {
+    for (const request of this.requests) {
+      if (request.product === product && request.deliveryDate > this.currentDay) {
+        console.log('уже заказывали');
+        return true;
+      }
+    }
+    return false;
   }
 
   // считает, сколько сейчас на складе есть оптовых упаковок товара product
@@ -279,6 +285,5 @@ export class StorageComponent implements OnInit {
         deliveryDate: this.currentDay
       });
     }
-    console.log('Исполнили заявку', request);
   }
 }
