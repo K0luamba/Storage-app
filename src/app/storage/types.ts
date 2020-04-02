@@ -1,36 +1,37 @@
 // продукт как известный вид
 export class Product {
-    name: string;
+    name: string; // название продукта
     storagePeriod: number; // срок хранения в днях
-    boxCapacity: number; // сколько пачек (считаем все расфасованным) помещается в одной упаковке(ящике)
+    boxCapacity: number; // сколько пачек помещается в одной упаковке
     price: number; // цена за одну упаковку
 }
 
-// упаковка, со ссылкой на продукт
+// упаковка товара
 export class Box {
-    product: Product;
-    deliveryDate: number;
+    product: Product; // ссылка на продукт
+    deliveryDate: number; // дата доставки на склад
 }
 
-// торговая точка со списком текущих заказов от нее
+// торговая точка
 export class Store {
-    name: string;
-    orders: Array<Order>;
+    name: string; // название магазина
+    orders: Array<Order>; // текущие заказы точки
 }
 
-// заявка на наш склад на доставку списка продуктов
+// заявка на наш склад
 export class Order {
-    items: Array<OrderItem>;
+    items: Array<OrderItem>; // список продуктов
 }
 
+// пункт заказа
 export class OrderItem {
-    product: Product;
-    numberOfPacks: number; // число заказанных пачек (1 упаковка = n пачек)
+    product: Product; // запрашиваемый товар
+    numberOfPacks: number; // число заказанных пачек
 }
 
 // запрос поставщику на оптовую поставку продукта
 export class Request {
-    product: Product;
-    numberOfBoxes: number;
-    deliveryDate: number;
+    product: Product; // запрашиваемый товар
+    numberOfBoxes: number; // число оптовых упаковок
+    deliveryDate: number; // дата поставки на наш склад
 }

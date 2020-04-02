@@ -1,18 +1,22 @@
+<!-- Основной шаблон веб-приложения -->
 <div class="container">
   <form class="filter-form" [formGroup]="formGr" (ngSubmit)="start()">
     <mat-form-field>
       <input matInput placeholder="Число товаров" formControlName="countOfProducts"
         oninput="this.value = this.value.replace (/\D/gi, '')">
+      <span class="validation-error"> {{ countOfProductsValidation }} </span>
     </mat-form-field>
     <mat-form-field>
       <input matInput placeholder="Число торговых точек" formControlName="countOfStores"
         oninput="this.value = this.value.replace (/\D/gi, '')">
+      <span class="validation-error"> {{ countOfStoresValidation }} </span>
     </mat-form-field>
     <mat-form-field>
       <input matInput placeholder="Число дней" formControlName="countOfDays"
         oninput="this.value = this.value.replace (/\D/gi, '')">
+      <span class="validation-error"> {{ countOfDaysValidation }} </span>
     </mat-form-field>
-    <button class="btn-action" mat-stroked-button color="primary" type="submit" [disabled]="currentDay !== 0">
+    <button class="btn-action" mat-stroked-button color="primary" type="submit" [disabled]="currentDay !== 0 || invalidForm">
       <i class="material-icons">input</i> Начать
     </button>
   </form>

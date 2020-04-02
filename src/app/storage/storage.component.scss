@@ -23,6 +23,15 @@
     }
 }
 
+.validation-error {
+    position: absolute;
+    left: -1px;
+    bottom: 45px;
+    font-size: 11px;
+    white-space: nowrap;
+    color: rgb(202, 63, 63);
+}
+
 .btn-action {
     font-size: 16px;
     .material-icons {

@@ -1,11 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { MatSort, MatTableDataSource } from '@angular/material';
+import { MatTableDataSource } from '@angular/material';
+import { takeWhile } from 'rxjs/operators';
 
 import { Product, Box, Order, Store, OrderItem, Request } from './types';
 import { StorageConstants } from './constants.helper';
 import { TableHelper } from './table.helper';
 import { SortHelper } from './sort.helper';
+import { Validator } from './validator';
 import products from './products.json';
 
 @Component({
@@ -13,25 +15,21 @@ import products from './products.json';
   templateUrl: './storage.component.html',
   styleUrls: ['./storage.component.scss']
 })
-export class StorageComponent implements OnInit {
+// основной класс, отвечающий за взаимодействие элементов между собой
+export class StorageComponent implements OnInit, OnDestroy {
 
+  alive = true;
   StorageConstants = StorageConstants; // необходимо, чтобы переменная стала видимой для шаблона
   TableHelper = TableHelper;
   formGr: FormGroup;
+  invalidForm = false;
+  countOfProductsValidation = null;
+  countOfStoresValidation = null;
+  countOfDaysValidation = null;
 
-  K = 12;
-  M = 3;
-  N = 30;
-  MIN_PRODUCT_BOXES = 10;
-  MAX_PRODUCT_BOXES = 20;
-  MIN_ORDER_POINTS = 0;
-  MAX_ORDER_POINTS = 3;
-  MIN_BOXES_TO_ORDER = 1;
-  MAX_BOXES_TO_ORDER = 5;
-  MIN_OPTIMAL_PRODUCT_BOXES = 5;
-  BOXES_IN_REQUEST = 10;
-  MIN_DAYS_TO_DELIVER = 1;
-  MAX_DAYS_TO_DELIVER = 5;
+  K: number; // число видов продуктов
+  M: number; // число торговых точек
+  N: number; // число дней симуляции
 
   currentDay = 0;
   stopped = false;
@@ -61,6 +59,11 @@ export class StorageComponent implements OnInit {
     this.ordersDataSource.data = null;
     this.deliveriesDataSource.data = null;
     this.requestsDataSource.data = null;
+    this.enableValidation();
+  }
+
+  ngOnDestroy() {
+    this.alive = false;
   }
 
   // случайное целое число от min до max
@@ -77,14 +80,55 @@ export class StorageComponent implements OnInit {
     });
   }
 
-  // начало симуляции, определение исходных данных по параметрам от пользователя
+  // проверка того, что пользователь ввел правильные значения в форму
+  enableValidation() {
+    this.formGr.get('countOfProducts').valueChanges
+      .pipe(takeWhile(() => this.alive)).subscribe(value => {
+        this.countOfProductsValidation = Validator.checkCountOfProducts(value);
+        this.checkAllIsValid();
+      });
+    this.formGr.get('countOfStores').valueChanges
+      .pipe(takeWhile(() => this.alive)).subscribe(value => {
+        this.countOfStoresValidation = Validator.checkCountOfStores(value);
+        this.checkAllIsValid();
+      });
+    this.formGr.get('countOfDays').valueChanges
+      .pipe(takeWhile(() => this.alive)).subscribe(value => {
+        this.countOfDaysValidation = Validator.checkCountOfDays(value);
+        this.checkAllIsValid();
+      });
+  }
+
+  // отвечает за блокировку/разблокировку кнопки начала
+  checkAllIsValid() {
+    if (this.countOfProductsValidation || this.countOfStoresValidation || this.countOfDaysValidation) {
+      this.invalidForm = true;
+    } else {
+      this.invalidForm = false;
+    }
+  }
+
+  // не выводим сообщение об ошибке по умолчанию, но инициируем проверку значений, когда надо
+  triggerValidation() {
+    for (const control of Object.keys(this.formGr.controls)) {
+      this.formGr.get(control).setValue(this.formGr.get(control).value);
+    }
+  }
+
+  // начало симуляции, определение исходных данных (продуктов, торговых точек) по параметрам от пользователя
   start() {
     console.log('start');
-    // инициализация продуктов, торговых точек и т.д.
-    // this.knownProducts = StorageConstants.productTypes.slice(0, this.K);
+    this.triggerValidation();
+    if (this.invalidForm) { return; }
+    this.K = Number(this.formGr.get('countOfProducts').value);
+    this.M = Number(this.formGr.get('countOfStores').value);
+    this.N = Number(this.formGr.get('countOfDays').value);
+    this.formGr.get('countOfProducts').disable();
+    this.formGr.get('countOfStores').disable();
+    this.formGr.get('countOfDays').disable();
     this.knownProducts = products.slice(0, this.K);
     for (const productType of this.knownProducts) {
-      for (let i = 0; i < this.randomInteger(this.MIN_PRODUCT_BOXES, this.MAX_PRODUCT_BOXES); i++) {
+      for (let i = 0; i < this.randomInteger(StorageConstants.MIN_PRODUCT_BOXES, StorageConstants.MAX_PRODUCT_BOXES); i++) {
         this.storageBoxes.push({
           product: productType,
           deliveryDate: 1
@@ -103,29 +147,30 @@ export class StorageComponent implements OnInit {
     this.currentDay += 1;
     if (this.currentDay - 1 === this.N) { // отнимаем 1, чтобы закончить, условно, в 31-ый день, если N = 30
       this.stop();
-    }
-    console.log('день:', this.currentDay);
-    for (const request of this.requests) {
-      if (request.deliveryDate === this.currentDay) {
-        this.proceedRequest(request);
-      }
-    }
-    this.writeOffGoods();
-    this.generateOrders();
-    this.deliveries = [];
-    this.boxesDataSource.data.sort(SortHelper.sortByDeliveryDate); // storageBoxes???
-    for (const store of this.stores) {
-      if (store.orders.length !== 0 && store.orders[0].items.length !== 0) {
-        for (const item of store.orders[0].items) {
-          this.acceptOrderItem(item);
+    } else {
+      console.log('день:', this.currentDay);
+      for (const request of this.requests) {
+        if (request.deliveryDate === this.currentDay) {
+          this.proceedRequest(request);
         }
       }
+      this.writeOffGoods();
+      this.generateOrders();
+      this.deliveries = [];
+      this.boxesDataSource.data.sort(SortHelper.sortByDeliveryDate); // storageBoxes???
+      for (const store of this.stores) {
+        if (store.orders.length !== 0 && store.orders[0].items.length !== 0) {
+          for (const item of store.orders[0].items) {
+            this.acceptOrderItem(item);
+          }
+        }
+      }
+      this.boxesDataSource.data.sort(SortHelper.sortByProductName);
+      this.deliveriesDataSource.data = this.deliveries;
+      // console.log('запланировали перевозки:', this.deliveries);
+      this.makeRequests();
+      // console.log('текущие заявки:', this.requests);
     }
-    this.boxesDataSource.data.sort(SortHelper.sortByProductName);
-    this.deliveriesDataSource.data = this.deliveries;
-    // console.log('запланировали перевозки:', this.deliveries);
-    this.makeRequests();
-    // console.log('текущие заявки:', this.requests);
   }
 
   allSteps() {
@@ -165,7 +210,7 @@ export class StorageComponent implements OnInit {
     const ordersData = [];
     for (const store of this.stores) {
       store.orders = []; // предыдущие заказы забываем, так как они либо исполнены, либо отклонены
-      const numberOfItems = this.randomInteger(this.MIN_ORDER_POINTS, this.MAX_ORDER_POINTS);
+      const numberOfItems = this.randomInteger(StorageConstants.MIN_ORDER_POINTS, StorageConstants.MAX_ORDER_POINTS);
       console.log(`от торг. точки ${store.name} закажем ${numberOfItems} продуктов:`);
       if (numberOfItems > 0) {
         const newOrder: Order = {
@@ -180,8 +225,8 @@ export class StorageComponent implements OnInit {
             }
           }
           orderedProducts.push(productIndex);
-          const packsToOrder = this.randomInteger(this.MIN_BOXES_TO_ORDER * this.knownProducts[productIndex].boxCapacity,
-            this.MAX_BOXES_TO_ORDER * this.knownProducts[productIndex].boxCapacity);
+          const packsToOrder = this.randomInteger(StorageConstants.MIN_BOXES_TO_ORDER * this.knownProducts[productIndex].boxCapacity,
+            StorageConstants.MAX_BOXES_TO_ORDER * this.knownProducts[productIndex].boxCapacity);
           newOrder.items.push({
             product: this.knownProducts[productIndex],
             numberOfPacks: packsToOrder
@@ -213,7 +258,7 @@ export class StorageComponent implements OnInit {
 
   // смотрит, сколько можем отправить опт. упаковок товара product, чтобы отправить пачек в кол-ве needPacks
   getOptimalNumberofBoxes(product: Product, needPacks: number): number {
-    const countOfBoxes = this.boxesDataSource.data.filter(box => box.product.name === product.name).length;
+    const countOfBoxes = this.storageBoxes.filter(box => box.product.name === product.name).length;
     // вариант 1: свободного товара на складе не осталось
     if (countOfBoxes === 0) {
       this.ordersNotCompleted++;
@@ -248,11 +293,12 @@ export class StorageComponent implements OnInit {
     this.requestsDataSource.data = [];
     const todayRequests: Array<Request> = [];
     for (const knownProduct of this.knownProducts) {
-      if (this.getCountOfProduct(knownProduct) < this.MIN_OPTIMAL_PRODUCT_BOXES && !this.haveProductInFutureRequests(knownProduct)) {
+      if (this.getCountOfProduct(knownProduct) < StorageConstants.MIN_OPTIMAL_PRODUCT_BOXES
+        && !this.haveProductInFutureRequests(knownProduct)) {
         const newRequest = {
           product: knownProduct,
-          numberOfBoxes: this.BOXES_IN_REQUEST,
-          deliveryDate: this.currentDay + this.randomInteger(this.MIN_DAYS_TO_DELIVER, this.MAX_DAYS_TO_DELIVER)
+          numberOfBoxes: StorageConstants.BOXES_IN_REQUEST,
+          deliveryDate: this.currentDay + this.randomInteger(StorageConstants.MIN_DAYS_TO_DELIVER, StorageConstants.MAX_DAYS_TO_DELIVER)
         };
         this.requests.push(newRequest);
         todayRequests.push(newRequest);
@@ -265,7 +311,6 @@ export class StorageComponent implements OnInit {
   haveProductInFutureRequests(product: Product): boolean {
     for (const request of this.requests) {
       if (request.product === product && request.deliveryDate > this.currentDay) {
-        console.log('уже заказывали');
         return true;
       }
     }
@@ -280,7 +325,7 @@ export class StorageComponent implements OnInit {
   // добавляет на склад продукты по исполняемой заявке request
   proceedRequest(request: Request) {
     for (let i = 0; i < request.numberOfBoxes; i++) {
-      this.boxesDataSource.data.push({
+      this.storageBoxes.push({
         product: request.product,
         deliveryDate: this.currentDay
       });
