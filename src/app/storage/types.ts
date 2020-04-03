@@ -35,3 +35,11 @@ export class Request {
     numberOfBoxes: number; // число оптовых упаковок
     deliveryDate: number; // дата поставки на наш склад
 }
+
+// структура данных исключительно для вывода, не участвует в логике
+export class BoxesData {
+    productName: string;
+    deliveryDate: number;
+    validUntil: number;
+    numberOfBoxes: number;
+}

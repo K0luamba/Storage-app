@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material';
 import { takeWhile } from 'rxjs/operators';
 
-import { Product, Box, Order, Store, OrderItem, Request } from './types';
+import { Product, Box, Order, Store, OrderItem, Request, BoxesData } from './types';
 import { StorageConstants } from './constants.helper';
 import { TableHelper } from './table.helper';
 import { SortHelper } from './sort.helper';
@@ -35,7 +35,7 @@ export class StorageComponent implements OnInit, OnDestroy {
   stopped = false;
   knownProducts: Array<Product>;
   storageBoxes: Array<Box> = [];
-  boxesDataSource = new MatTableDataSource<Box>();
+  boxesData: Array<BoxesData> = [];
   stores: Array<Store>;
   ordersDataSource = new MatTableDataSource<OrderItem>();
   deliveries: Array<OrderItem>;
@@ -115,6 +115,30 @@ export class StorageComponent implements OnInit, OnDestroy {
     }
   }
 
+  // сделано для более структурированного представления данных о продуктах в таблице
+  reloadBoxesData() {
+    this.boxesData = [];
+    for (const product of this.knownProducts) {
+      for (let date = 1; date <= this.N; date++) {
+        let countOfThisPair = 0;
+        for (const box of this.storageBoxes) {
+          if (box.product.name === product.name && box.deliveryDate === date) {
+            countOfThisPair++;
+          }
+        }
+        if (countOfThisPair > 0) {
+          this.boxesData.push({
+            productName: product.name,
+            deliveryDate: date,
+            validUntil: date + product.storagePeriod,
+            numberOfBoxes: countOfThisPair
+          });
+        }
+      }
+    }
+    console.log('boxes info:', this.boxesData);
+  }
+
   // начало симуляции, определение исходных данных (продуктов, торговых точек) по параметрам от пользователя
   start() {
     console.log('start');
@@ -127,6 +151,7 @@ export class StorageComponent implements OnInit, OnDestroy {
     this.formGr.get('countOfStores').disable();
     this.formGr.get('countOfDays').disable();
     this.knownProducts = products.slice(0, this.K);
+    this.knownProducts.sort(SortHelper.sortByName);
     for (const productType of this.knownProducts) {
       for (let i = 0; i < this.randomInteger(StorageConstants.MIN_PRODUCT_BOXES, StorageConstants.MAX_PRODUCT_BOXES); i++) {
         this.storageBoxes.push({
@@ -136,7 +161,6 @@ export class StorageComponent implements OnInit, OnDestroy {
       }
     }
     this.storageBoxes.sort(SortHelper.sortByProductName);
-    this.boxesDataSource.data = this.storageBoxes;
     this.stores = StorageConstants.stores.slice(0, this.M);
 
     this.step();
@@ -155,9 +179,10 @@ export class StorageComponent implements OnInit, OnDestroy {
         }
       }
       this.writeOffGoods();
+      this.reloadBoxesData();
       this.generateOrders();
       this.deliveries = [];
-      this.boxesDataSource.data.sort(SortHelper.sortByDeliveryDate); // storageBoxes???
+      this.storageBoxes.sort(SortHelper.sortByDeliveryDate);
       for (const store of this.stores) {
         if (store.orders.length !== 0 && store.orders[0].items.length !== 0) {
           for (const item of store.orders[0].items) {
@@ -165,7 +190,7 @@ export class StorageComponent implements OnInit, OnDestroy {
           }
         }
       }
-      this.boxesDataSource.data.sort(SortHelper.sortByProductName);
+      this.storageBoxes.sort(SortHelper.sortByProductName);
       this.deliveriesDataSource.data = this.deliveries;
       // console.log('запланировали перевозки:', this.deliveries);
       this.makeRequests();
@@ -201,7 +226,6 @@ export class StorageComponent implements OnInit, OnDestroy {
     }
     this.storageBoxes = this.storageBoxes.filter(item => item.deliveryDate + item.product.storagePeriod > this.currentDay);
     this.storageBoxes.sort(SortHelper.sortByProductName); // нужно для удобства визуальной составляющей
-    this.boxesDataSource.data = this.storageBoxes; // обновление данных в таблице
   }
 
   // проход по торговым точкам и генерация заказов

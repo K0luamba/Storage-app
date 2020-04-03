@@ -61,7 +61,9 @@ export class StorageConstants {
 
     static readonly boxesDisplayedColumns = [
         'name',
-        'deliveryDate'
+        'deliveryDate',
+        'validUntil',
+        'numberOfBoxes'
     ];
 
     static readonly ordersDisplayedColumns = [
