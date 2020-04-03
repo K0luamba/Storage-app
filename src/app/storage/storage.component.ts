@@ -136,7 +136,6 @@ export class StorageComponent implements OnInit, OnDestroy {
         }
       }
     }
-    console.log('boxes info:', this.boxesData);
   }
 
   // начало симуляции, определение исходных данных (продуктов, торговых точек) по параметрам от пользователя

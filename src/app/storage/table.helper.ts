@@ -1,5 +1,6 @@
 import { Store, OrderItem } from './types';
 
+// один их дополнительных классов для лучшего визуального представления данных
 export class TableHelper {
   public static getStoreName(searchedItem: OrderItem, stores: Array<Store>): string {
     for (const store of stores) {

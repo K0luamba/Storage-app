@@ -1,5 +1,6 @@
 import { Box, Product } from './types';
 
+// кастомные сортировки для объектов
 export class SortHelper {
     public static sortByDeliveryDate(b1: Box, b2: Box) {
         if (b1.deliveryDate > b2.deliveryDate) {

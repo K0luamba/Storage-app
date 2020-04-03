@@ -1,5 +1,6 @@
 import { StorageConstants } from './constants.helper';
 
+// класс, не участвующий в основной логике, нужен только для проверки формы и вывода ошибок
 export class Validator {
     static requiredField(value: string): string | null {
       if (!value || value.length === 0) {

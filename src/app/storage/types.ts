@@ -1,4 +1,4 @@
-// продукт как известный вид
+// продукт как известный вид товара
 export class Product {
     name: string; // название продукта
     storagePeriod: number; // срок хранения в днях
@@ -36,7 +36,7 @@ export class Request {
     deliveryDate: number; // дата поставки на наш склад
 }
 
-// структура данных исключительно для вывода, не участвует в логике
+// структура данных исключительно для вывода, не участвует в основной логике
 export class BoxesData {
     productName: string;
     deliveryDate: number;
