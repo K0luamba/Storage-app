@@ -1,6 +1,6 @@
 <!-- Основной шаблон веб-приложения -->
 <div class="container">
-  <form class="filter-form" [formGroup]="formGr" (ngSubmit)="start()">
+  <form class="filter-form" [formGroup]="formGr" (ngSubmit)="start()" autocomplete="off">
     <mat-form-field>
       <input matInput placeholder="Число товаров" formControlName="countOfProducts"
         oninput="this.value = this.value.replace (/\D/gi, '')">
@@ -38,8 +38,8 @@
           </ng-container>
 
           <ng-container matColumnDef="validUntil">
-            <th mat-header-cell *matHeaderCellDef> Годен до </th>
-            <td mat-cell *matCellDef="let element"> {{ element.validUntil }} </td>
+            <th mat-header-cell *matHeaderCellDef> Дней осталось </th>
+            <td mat-cell *matCellDef="let element"> {{ element.validUntil - currentDay }} </td>
           </ng-container>
 
           <ng-container matColumnDef="numberOfBoxes">
@@ -155,7 +155,7 @@
   </span>
   <span class="total-income"> Суммарный доход: {{ totalIncome }}₽ </span>
   <span class="total-losses"> Суммарные убытки: {{ totalLosses }}₽ </span>
-  <span class="current-day"> Текущий день: {{ currentDay }} </span>
+  <span class="current-day"> <b> Текущий день: {{ currentDay }} </b> </span>
   <button *ngIf="!stopped" class="btn-action next" mat-stroked-button color="primary" (click)="step()" [disabled]="currentDay === 0 || stopped">
     <i class="material-icons">forward</i> Следующий день
   </button>

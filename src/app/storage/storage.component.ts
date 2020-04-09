@@ -139,7 +139,7 @@ export class StorageComponent implements OnInit, OnDestroy {
   }
 
   // начало симуляции, определение исходных данных (продуктов, торговых точек) по параметрам от пользователя
-  start() {
+  start(): void {
     console.log('start');
     this.triggerValidation();
     if (this.invalidForm) { return; }
@@ -220,11 +220,18 @@ export class StorageComponent implements OnInit, OnDestroy {
         }
       }
       if (numberOfExpired > 0) {
-        this.todayLosses.push(`Списан товар "${product.name}" стоимостью ${product.price} ₽ в количестве ${numberOfExpired} упаковок(-ки).`);
+        this.todayLosses.push(`Списан товар "${product.name}" стоимостью ${product.price} ₽ в количестве ${numberOfExpired} ${this.getWordForNumber(numberOfExpired)}.`);
       }
     }
     this.storageBoxes = this.storageBoxes.filter(item => item.deliveryDate + item.product.storagePeriod > this.currentDay);
     this.storageBoxes.sort(SortHelper.sortByProductName); // нужно для удобства визуальной составляющей
+  }
+
+  getWordForNumber(count: number): string {
+    if (count === 1 || (count > 20 && count % 10 === 1)) {
+      return 'упаковки';
+    }
+    return 'упаковок';
   }
 
   // проход по торговым точкам и генерация заказов
@@ -297,7 +304,7 @@ export class StorageComponent implements OnInit, OnDestroy {
     return Math.ceil(needPacks / product.boxCapacity);
   }
 
-  // плинирует списание товаров со склада на доставку
+  // планирует списание товаров со склада на доставку
   prepareGoodsToDeliver(product: Product, numberOfBoxes: number) {
     let proceedBoxes = 0;
     let i = 0;
